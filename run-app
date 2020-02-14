@@ -1,0 +1,4 @@
+#!/bin/bash
+
+carton install
+PERL5LIB=$PWD/local/lib/perl5:$PWD/lib local/bin/morbo mojo-auth

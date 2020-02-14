@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# cleanup
+
+docker stop auth-db
+docker rm auth-db
+docker network rm auth

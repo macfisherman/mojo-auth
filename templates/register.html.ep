@@ -1,0 +1,32 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Majo Auth</title>
+</head>
+
+<body>
+<form>
+    Handle:<input type="text" name="handle" required/><br/>
+    email:<input type="email" name="email" required/><br/>
+    Password:<input type="password" name="password" id="password" required/><br/>
+    Confirm password:<input type="password" id="password_verify" required/><br/>
+    <input type="submit" name="signup" value="Sign up" formmethod="post" />
+</form>
+  <script type="text/javascript">
+    window.onload = function () {
+        var txtPassword = document.getElementById("password");
+        var txtConfirmPassword = document.getElementById("password_verify");
+        txtPassword.onchange = ConfirmPassword;
+        txtConfirmPassword.onkeyup = ConfirmPassword;
+        function ConfirmPassword() {
+            txtConfirmPassword.setCustomValidity("");
+            if (txtPassword.value != txtConfirmPassword.value) {
+                txtConfirmPassword.setCustomValidity("Passwords do not match.");
+            }
+        }
+    }
+</script>
+</body>
+</html>

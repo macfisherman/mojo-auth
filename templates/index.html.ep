@@ -1,0 +1,14 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mojo Auth</title>
+</head>
+<body>
+  <%= link_to Register => "register" %>
+  <%= link_to Login => "login" %></br>
+
+  Welcome to Mojo Auth!
+</body>
+</html>

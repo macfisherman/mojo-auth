@@ -1,0 +1,102 @@
+#!/usr/bin/env perl
+use Mojolicious::Lite;
+use Mojo::mysql;
+
+use lib 'lib';
+use MyApp::Model::Auth;
+
+plugin 'Config';
+
+my $dbpass = app->config("db_password");
+my $DB     = Mojo::mysql->new(
+    dsn      => "dbi:mysql:database=myapp;host=auth-db",
+    username => 'auth',
+    password => $dbpass,
+);
+
+helper auth => sub { state $auth = MyApp::Model::Auth->new($DB) };
+
+$DB->migrations->from_data->migrate();
+
+get "/" => sub {
+    my $c = shift;
+
+    my $user = $c->session("user");
+    if ($user) {
+        $c->redirect_to("/user/$user");
+    }
+} => 'index';
+
+get "/register";
+post "/register" => sub {
+    my $c = shift;
+
+    my $handle   = $c->param("handle");
+    my $user     = $c->param("email");
+    my $password = $c->param("password");
+
+    $c->auth->register( $handle, $user, $password );
+    $c->redirect_to("login");
+};
+
+get "/login" => sub {
+    my $c = shift;
+
+    $c->stash( message => "" );
+};
+
+post "/login" => sub {
+    my $c = shift;
+
+    my $handle   = $c->param("handle");
+    my $password = $c->param("password");
+
+    my $user_id = $c->auth->authenticate( $handle, $password );
+    if ($user_id) {
+        $c->session( user    => $handle );
+        $c->session( user_id => $user_id );
+        $c->redirect_to("user/$handle");
+    }
+
+    $c->stash( message => "Invalid login, try again." );
+};
+
+under "/user" => sub {
+    my $c = shift;
+
+    if ( $c->session("user") ) {
+        my $user_id = $c->session("user_id");
+        return 1;
+    }
+
+    $c->redirect_to("/login");
+};
+
+get "/:user" => sub {
+    my $c = shift;
+
+    my $user = $c->stash("user");
+
+    if ( $user ne $c->session("user") ) {
+        $c->render( text => "Unauthorized", status => 403 );
+        return;
+    }
+
+    $c->render( text => "Hi $user!" );
+};
+
+app->start;
+
+__DATA__
+@@ migrations
+-- 1 up
+CREATE TABLE password (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    handle VARCHAR(255),
+    email VARCHAR(255) UNIQUE,
+    password char(128)
+);
+
+
+-- 1 down
+DROP TABLE password;
